@@ -1,0 +1,397 @@
+<html>
+<head>
+<meta charset="UTF-8">
+</head>
+<body>
+
+<pre><code class="language-html">&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;ko&quot;&gt;
+&lt;head&gt;
+  &lt;meta charset=&quot;UTF-8&quot;&gt;
+
+  &lt;meta
+    name=&quot;viewport&quot;
+    content=&quot;width=device-width,
+             initial-scale=1.0,
+             maximum-scale=1.0,
+             user-scalable=no&quot;
+  &gt;
+
+  &lt;title&gt;GARAGE BAND&lt;/title&gt;
+
+  <i>&lt;!-- A-Frame --&gt;</i>
+  &lt;script src=&quot;https://aframe.io/releases/1.5.0/aframe.min.js&quot;&gt;&lt;/script&gt;
+
+  <i>&lt;!-- MindAR --&gt;</i>
+  &lt;script src=&quot;https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js&quot;&gt;&lt;/script&gt;
+
+  &lt;style&gt;
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background: #000;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    <i>/* 화면 위 UI */</i>
+    #interface {
+      position: fixed;
+      z-index: 9999;
+
+      left: 0;
+      right: 0;
+      bottom: 45px;
+
+      text-align: center;
+
+      pointer-events: none;
+    }
+
+    <i>/* 상태 표시 */</i>
+    #status {
+      color: white;
+
+      font-size: 13px;
+      letter-spacing: 3px;
+
+      margin-bottom: 18px;
+
+      text-transform: uppercase;
+
+      text-shadow:
+        0 1px 4px rgba(0,0,0,0.8);
+    }
+
+    <i>/* PLAY 버튼 */</i>
+    #playButton {
+
+      display: none;
+
+      pointer-events: auto;
+
+      appearance: none;
+
+      border: 1px solid white;
+
+      background: rgba(0,0,0,0.75);
+
+      color: white;
+
+      padding: 16px 28px;
+
+      font-size: 14px;
+
+      letter-spacing: 3px;
+
+      font-weight: bold;
+
+      cursor: pointer;
+
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    #playButton:active {
+      background: white;
+      color: black;
+    }
+
+    <i>/* 다시 재생 버튼 */</i>
+    #restartButton {
+
+      display: none;
+
+      pointer-events: auto;
+
+      margin-left: 8px;
+
+      appearance: none;
+
+      border: 1px solid white;
+
+      background: rgba(0,0,0,0.75);
+
+      color: white;
+
+      padding: 16px 18px;
+
+      font-size: 13px;
+
+      letter-spacing: 2px;
+
+      cursor: pointer;
+    }
+
+  &lt;/style&gt;
+&lt;/head&gt;
+
+
+&lt;body&gt;
+
+  <i>&lt;!-- =========================
+       화면 UI
+       ========================= --&gt;</i>
+
+  &lt;div id=&quot;interface&quot;&gt;
+
+    &lt;div id=&quot;status&quot;&gt;
+      AIM AT THE GARAGE
+    &lt;/div&gt;
+
+    &lt;button id=&quot;playButton&quot;&gt;
+      PLAY TRACK 01
+    &lt;/button&gt;
+
+    &lt;button id=&quot;restartButton&quot;&gt;
+      REPLAY
+    &lt;/button&gt;
+
+  &lt;/div&gt;
+
+
+  <i>&lt;!-- =========================
+       음악
+       ========================= --&gt;</i>
+
+  &lt;audio
+    id=&quot;music&quot;
+    src=&quot;./music.mp3&quot;
+    preload=&quot;auto&quot;
+    playsinline&gt;
+  &lt;/audio&gt;
+
+
+  <i>&lt;!-- =========================
+       MindAR
+       ========================= --&gt;</i>
+
+  &lt;a-scene
+
+    mindar-image=&quot;
+      imageTargetSrc: ./targets.mind;
+      autoStart: true;
+      uiLoading: yes;
+      uiScanning: yes;
+      uiError: yes;
+    &quot;
+
+    color-space=&quot;sRGB&quot;
+
+    renderer=&quot;
+      colorManagement: true;
+      physicallyCorrectLights: true;
+    &quot;
+
+    vr-mode-ui=&quot;enabled: false&quot;
+
+    device-orientation-permission-ui=&quot;
+      enabled: false
+    &quot;
+
+  &gt;
+
+    <i>&lt;!-- 카메라 --&gt;</i>
+
+    &lt;a-camera
+      position=&quot;0 0 0&quot;
+      look-controls=&quot;enabled: false&quot;
+      cursor=&quot;fuse: false&quot;
+      raycaster=&quot;objects: .clickable&quot;&gt;
+    &lt;/a-camera&gt;
+
+
+    <i>&lt;!-- =========================
+         이미지 인식 타깃
+
+         targetIndex: 0
+         = targets.mind의 첫 번째 이미지
+         ========================= --&gt;</i>
+
+    &lt;a-entity
+      id=&quot;garageTarget&quot;
+      mindar-image-target=&quot;
+        targetIndex: 0;
+      &quot;&gt;
+    &lt;/a-entity&gt;
+
+  &lt;/a-scene&gt;
+
+
+  <i>&lt;!-- =========================
+       JavaScript
+       ========================= --&gt;</i>
+
+  &lt;script&gt;
+
+    <i>/* -------------------------
+       요소 가져오기
+       ------------------------- */</i>
+
+    const target =
+      document.querySelector(&quot;#garageTarget&quot;);
+
+    const status =
+      document.querySelector(&quot;#status&quot;);
+
+    const playButton =
+      document.querySelector(&quot;#playButton&quot;);
+
+    const restartButton =
+      document.querySelector(&quot;#restartButton&quot;);
+
+    const music =
+      document.querySelector(&quot;#music&quot;);
+
+
+    <i>/* -------------------------
+       이미지 인식됨
+       ------------------------- */</i>
+
+    target.addEventListener(
+      &quot;targetFound&quot;,
+      function () {
+
+        console.log(
+          &quot;GARAGE BAND TARGET FOUND&quot;
+        );
+
+        status.innerText =
+          &quot;GARAGE BAND — TRACK 01&quot;;
+
+        playButton.style.display =
+          &quot;inline-block&quot;;
+
+        restartButton.style.display =
+          &quot;none&quot;;
+      }
+    );
+
+
+    <i>/* -------------------------
+       이미지가 카메라에서 사라짐
+       ------------------------- */</i>
+
+    target.addEventListener(
+      &quot;targetLost&quot;,
+      function () {
+
+        console.log(
+          &quot;GARAGE BAND TARGET LOST&quot;
+        );
+
+        status.innerText =
+          &quot;AIM AT THE GARAGE&quot;;
+
+        <i>/*
+          음악은 여기서 자동으로
+          정지시키지 않는다.
+
+          따라서 티셔츠를 잠깐 놓쳐도
+          음악은 계속 재생된다.
+        */</i>
+
+      }
+    );
+
+
+    <i>/* -------------------------
+       PLAY
+       ------------------------- */</i>
+
+    playButton.addEventListener(
+      &quot;click&quot;,
+      async function () {
+
+        try {
+
+          await music.play();
+
+          status.innerText =
+            &quot;NOW PLAYING — TRACK 01&quot;;
+
+          playButton.style.display =
+            &quot;none&quot;;
+
+          restartButton.style.display =
+            &quot;inline-block&quot;;
+
+        }
+
+        catch (error) {
+
+          console.log(
+            &quot;Audio playback error:&quot;,
+            error
+          );
+
+          status.innerText =
+            &quot;TAP PLAY TO START&quot;;
+
+        }
+
+      }
+    );
+
+
+    <i>/* -------------------------
+       REPLAY
+       ------------------------- */</i>
+
+    restartButton.addEventListener(
+      &quot;click&quot;,
+      async function () {
+
+        try {
+
+          music.currentTime = 0;
+
+          await music.play();
+
+          status.innerText =
+            &quot;NOW PLAYING — TRACK 01&quot;;
+
+        }
+
+        catch (error) {
+
+          console.log(
+            &quot;Replay error:&quot;,
+            error
+          );
+
+        }
+
+      }
+    );
+
+
+    <i>/* -------------------------
+       음악이 끝났을 때
+       ------------------------- */</i>
+
+    music.addEventListener(
+      &quot;ended&quot;,
+      function () {
+
+        status.innerText =
+          &quot;TRACK 01 — ENDED&quot;;
+
+        restartButton.style.display =
+          &quot;inline-block&quot;;
+
+      }
+    );
+
+
+  &lt;/script&gt;
+
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+
+</body>
+</html>
