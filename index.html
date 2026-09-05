@@ -1,32 +1,25 @@
-<html>
+<!DOCTYPE html>
+<html lang="ko">
 <head>
-<meta charset="UTF-8">
-</head>
-<body>
+  <meta charset="UTF-8">
 
-<pre><code class="language-html">&lt;!DOCTYPE html&gt;
-&lt;html lang=&quot;ko&quot;&gt;
-&lt;head&gt;
-  &lt;meta charset=&quot;UTF-8&quot;&gt;
-
-  &lt;meta
-    name=&quot;viewport&quot;
-    content=&quot;width=device-width,
+  <meta
+    name="viewport"
+    content="width=device-width,
              initial-scale=1.0,
              maximum-scale=1.0,
-             user-scalable=no&quot;
-  &gt;
+             user-scalable=no"
+  >
 
-  &lt;title&gt;GARAGE BAND&lt;/title&gt;
+  <title>GARAGE BAND</title>
 
-  <i>&lt;!-- A-Frame --&gt;</i>
-  &lt;script src=&quot;https://aframe.io/releases/1.5.0/aframe.min.js&quot;&gt;&lt;/script&gt;
+  <!-- A-Frame -->
+  <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
 
-  <i>&lt;!-- MindAR --&gt;</i>
-  &lt;script src=&quot;https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js&quot;&gt;&lt;/script&gt;
+  <!-- MindAR -->
+  <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
 
-  &lt;style&gt;
-
+  <style>
     * {
       box-sizing: border-box;
     }
@@ -39,359 +32,239 @@
       font-family: Arial, Helvetica, sans-serif;
     }
 
-    <i>/* 화면 위 UI */</i>
     #interface {
       position: fixed;
       z-index: 9999;
-
       left: 0;
       right: 0;
       bottom: 45px;
-
       text-align: center;
-
       pointer-events: none;
     }
 
-    <i>/* 상태 표시 */</i>
     #status {
       color: white;
-
       font-size: 13px;
       letter-spacing: 3px;
-
       margin-bottom: 18px;
-
       text-transform: uppercase;
-
-      text-shadow:
-        0 1px 4px rgba(0,0,0,0.8);
+      text-shadow: 0 1px 4px rgba(0,0,0,0.8);
     }
 
-    <i>/* PLAY 버튼 */</i>
-    #playButton {
-
+    #playButton,
+    #replayButton {
       display: none;
-
       pointer-events: auto;
-
       appearance: none;
-
       border: 1px solid white;
-
       background: rgba(0,0,0,0.75);
-
       color: white;
-
       padding: 16px 28px;
-
       font-size: 14px;
-
       letter-spacing: 3px;
-
       font-weight: bold;
-
       cursor: pointer;
-
-      -webkit-tap-highlight-color: transparent;
     }
 
-    #playButton:active {
+    #playButton.active,
+    #replayButton.active {
+      display: inline-block;
+    }
+
+    #playButton:active,
+    #replayButton:active {
       background: white;
       color: black;
     }
 
-    <i>/* 다시 재생 버튼 */</i>
-    #restartButton {
-
-      display: none;
-
-      pointer-events: auto;
-
-      margin-left: 8px;
-
-      appearance: none;
-
-      border: 1px solid white;
-
-      background: rgba(0,0,0,0.75);
-
+    #loading {
+      position: fixed;
+      z-index: 10000;
+      inset: 0;
+      background: #000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       color: white;
-
-      padding: 16px 18px;
-
-      font-size: 13px;
-
-      letter-spacing: 2px;
-
-      cursor: pointer;
+      font-size: 14px;
+      letter-spacing: 3px;
     }
 
-  &lt;/style&gt;
-&lt;/head&gt;
+    #loading.hidden {
+      display: none;
+    }
+  </style>
+</head>
 
+<body>
 
-&lt;body&gt;
+  <div id="loading">
+    LOADING GARAGE...
+  </div>
 
-  <i>&lt;!-- =========================
-       화면 UI
-       ========================= --&gt;</i>
+  <div id="interface">
 
-  &lt;div id=&quot;interface&quot;&gt;
-
-    &lt;div id=&quot;status&quot;&gt;
+    <div id="status">
       AIM AT THE GARAGE
-    &lt;/div&gt;
+    </div>
 
-    &lt;button id=&quot;playButton&quot;&gt;
+    <button id="playButton">
       PLAY TRACK 01
-    &lt;/button&gt;
+    </button>
 
-    &lt;button id=&quot;restartButton&quot;&gt;
+    <button id="replayButton">
       REPLAY
-    &lt;/button&gt;
+    </button>
 
-  &lt;/div&gt;
+  </div>
 
+  <!--
+    MindAR AR Scene
+    targets.mind 파일은 이 index.html과 같은 폴더에 있어야 합니다.
+  -->
 
-  <i>&lt;!-- =========================
-       음악
-       ========================= --&gt;</i>
-
-  &lt;audio
-    id=&quot;music&quot;
-    src=&quot;./music.mp3&quot;
-    preload=&quot;auto&quot;
-    playsinline&gt;
-  &lt;/audio&gt;
-
-
-  <i>&lt;!-- =========================
-       MindAR
-       ========================= --&gt;</i>
-
-  &lt;a-scene
-
-    mindar-image=&quot;
+  <a-scene
+    mindar-image="
       imageTargetSrc: ./targets.mind;
       autoStart: true;
-      uiLoading: yes;
-      uiScanning: yes;
-      uiError: yes;
-    &quot;
+      uiLoading: no;
+      uiScanning: no;
+      uiError: no;
+    "
+    color-space="sRGB"
+    renderer="colorManagement: true, physicallyCorrectLights"
+    vr-mode-ui="enabled: false"
+    device-orientation-permission-ui="enabled: false"
+  >
 
-    color-space=&quot;sRGB&quot;
+    <a-camera
+      position="0 0 0"
+      look-controls="enabled: false"
+      cursor="fuse: false; rayOrigin: mouse;"
+      raycaster="objects: .clickable"
+    ></a-camera>
 
-    renderer=&quot;
-      colorManagement: true;
-      physicallyCorrectLights: true;
-    &quot;
+    <a-entity
+      id="target"
+      mindar-image-target="targetIndex: 0"
+    >
+    </a-entity>
 
-    vr-mode-ui=&quot;enabled: false&quot;
+  </a-scene>
 
-    device-orientation-permission-ui=&quot;
-      enabled: false
-    &quot;
+  <!-- 음악 -->
+  <audio
+    id="music"
+    src="./music.mp3"
+    preload="auto"
+    playsinline
+  ></audio>
 
-  &gt;
+  <script>
+    const target = document.querySelector("#target");
+    const music = document.querySelector("#music");
 
-    <i>&lt;!-- 카메라 --&gt;</i>
+    const status = document.querySelector("#status");
+    const playButton = document.querySelector("#playButton");
+    const replayButton = document.querySelector("#replayButton");
+    const loading = document.querySelector("#loading");
 
-    &lt;a-camera
-      position=&quot;0 0 0&quot;
-      look-controls=&quot;enabled: false&quot;
-      cursor=&quot;fuse: false&quot;
-      raycaster=&quot;objects: .clickable&quot;&gt;
-    &lt;/a-camera&gt;
+    let targetDetected = false;
 
+    /*
+      MindAR 로딩이 끝나면 로딩 화면 제거
+    */
+    window.addEventListener("load", function () {
+      setTimeout(function () {
+        loading.classList.add("hidden");
+      }, 1500);
+    });
 
-    <i>&lt;!-- =========================
-         이미지 인식 타깃
+    /*
+      이미지 인식 성공
+    */
+    target.addEventListener("targetFound", function () {
 
-         targetIndex: 0
-         = targets.mind의 첫 번째 이미지
-         ========================= --&gt;</i>
+      targetDetected = true;
 
-    &lt;a-entity
-      id=&quot;garageTarget&quot;
-      mindar-image-target=&quot;
-        targetIndex: 0;
-      &quot;&gt;
-    &lt;/a-entity&gt;
+      status.textContent = "GARAGE DETECTED";
 
-  &lt;/a-scene&gt;
+      playButton.classList.add("active");
 
+      replayButton.classList.remove("active");
+    });
 
-  <i>&lt;!-- =========================
-       JavaScript
-       ========================= --&gt;</i>
+    /*
+      이미지가 카메라에서 사라짐
+    */
+    target.addEventListener("targetLost", function () {
 
-  &lt;script&gt;
+      targetDetected = false;
 
-    <i>/* -------------------------
-       요소 가져오기
-       ------------------------- */</i>
+      status.textContent = "AIM AT THE GARAGE";
 
-    const target =
-      document.querySelector(&quot;#garageTarget&quot;);
+      playButton.classList.remove("active");
+    });
 
-    const status =
-      document.querySelector(&quot;#status&quot;);
+    /*
+      PLAY 버튼
+      아이폰에서는 사용자가 직접 버튼을 눌러야
+      음악 재생이 허용되는 경우가 많습니다.
+    */
+    playButton.addEventListener("click", async function () {
 
-    const playButton =
-      document.querySelector(&quot;#playButton&quot;);
+      try {
 
-    const restartButton =
-      document.querySelector(&quot;#restartButton&quot;);
+        await music.play();
 
-    const music =
-      document.querySelector(&quot;#music&quot;);
+        status.textContent = "NOW PLAYING — TRACK 01";
 
+        playButton.classList.remove("active");
 
-    <i>/* -------------------------
-       이미지 인식됨
-       ------------------------- */</i>
+        replayButton.classList.add("active");
 
-    target.addEventListener(
-      &quot;targetFound&quot;,
-      function () {
+      } catch (error) {
 
-        console.log(
-          &quot;GARAGE BAND TARGET FOUND&quot;
-        );
+        console.log("Audio playback error:", error);
 
-        status.innerText =
-          &quot;GARAGE BAND — TRACK 01&quot;;
-
-        playButton.style.display =
-          &quot;inline-block&quot;;
-
-        restartButton.style.display =
-          &quot;none&quot;;
-      }
-    );
-
-
-    <i>/* -------------------------
-       이미지가 카메라에서 사라짐
-       ------------------------- */</i>
-
-    target.addEventListener(
-      &quot;targetLost&quot;,
-      function () {
-
-        console.log(
-          &quot;GARAGE BAND TARGET LOST&quot;
-        );
-
-        status.innerText =
-          &quot;AIM AT THE GARAGE&quot;;
-
-        <i>/*
-          음악은 여기서 자동으로
-          정지시키지 않는다.
-
-          따라서 티셔츠를 잠깐 놓쳐도
-          음악은 계속 재생된다.
-        */</i>
+        status.textContent = "TAP AGAIN TO PLAY";
 
       }
-    );
 
+    });
 
-    <i>/* -------------------------
-       PLAY
-       ------------------------- */</i>
+    /*
+      REPLAY 버튼
+    */
+    replayButton.addEventListener("click", async function () {
 
-    playButton.addEventListener(
-      &quot;click&quot;,
-      async function () {
+      try {
 
-        try {
+        music.currentTime = 0;
 
-          await music.play();
+        await music.play();
 
-          status.innerText =
-            &quot;NOW PLAYING — TRACK 01&quot;;
+        status.textContent = "NOW PLAYING — TRACK 01";
 
-          playButton.style.display =
-            &quot;none&quot;;
+      } catch (error) {
 
-          restartButton.style.display =
-            &quot;inline-block&quot;;
-
-        }
-
-        catch (error) {
-
-          console.log(
-            &quot;Audio playback error:&quot;,
-            error
-          );
-
-          status.innerText =
-            &quot;TAP PLAY TO START&quot;;
-
-        }
+        console.log("Replay error:", error);
 
       }
-    );
 
+    });
 
-    <i>/* -------------------------
-       REPLAY
-       ------------------------- */</i>
+    /*
+      음악이 끝나면 다시 재생할 수 있게 함
+    */
+    music.addEventListener("ended", function () {
 
-    restartButton.addEventListener(
-      &quot;click&quot;,
-      async function () {
+      status.textContent = "TRACK 01 ENDED";
 
-        try {
+      replayButton.classList.add("active");
 
-          music.currentTime = 0;
-
-          await music.play();
-
-          status.innerText =
-            &quot;NOW PLAYING — TRACK 01&quot;;
-
-        }
-
-        catch (error) {
-
-          console.log(
-            &quot;Replay error:&quot;,
-            error
-          );
-
-        }
-
-      }
-    );
-
-
-    <i>/* -------------------------
-       음악이 끝났을 때
-       ------------------------- */</i>
-
-    music.addEventListener(
-      &quot;ended&quot;,
-      function () {
-
-        status.innerText =
-          &quot;TRACK 01 — ENDED&quot;;
-
-        restartButton.style.display =
-          &quot;inline-block&quot;;
-
-      }
-    );
-
-
-  &lt;/script&gt;
-
-&lt;/body&gt;
-&lt;/html&gt;</code></pre>
+    });
+  </script>
 
 </body>
 </html>
